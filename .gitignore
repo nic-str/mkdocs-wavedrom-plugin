@@ -11,6 +11,10 @@ env/
 
 # mkdocs documentation
 /site
+/tests/e2e_*/site
+/tests/e2e_*/.venv
+/tests/e2e_*/uv.lock
+.pytest_cache
 
 # mypy
 .mypy_cache/
@@ -21,3 +25,5 @@ docs/wavedrom.unpkg.js
 
 venv
 .vscode
+.python-version
+uv.lock

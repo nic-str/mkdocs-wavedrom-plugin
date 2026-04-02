@@ -5,8 +5,9 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
 from typing import Text
-import mkdocs
 from mkdocs.plugins import BasePlugin
+from mkdocs.config.base import Config
+from mkdocs.config.config_options import Type
 from bs4 import BeautifulSoup
 import wavedrom
 
@@ -26,9 +27,9 @@ def fence_wavedrom_format(source, language, class_name, options, md, **kwargs):
     return '<script type="WaveDrom">%s</script>' % (_escape(source))
 
 
-class WavedromConfig(mkdocs.config.base.Config):
-    embed_svg = mkdocs.config.config_options.Type(bool, default=False)
-    pymdownx = mkdocs.config.config_options.Type(bool, default=False)
+class WavedromConfig(Config):
+    embed_svg = Type(bool, default=False)
+    pymdownx = Type(bool, default=False)
 
 
 class WavedromPlugin(BasePlugin[WavedromConfig]):
@@ -65,6 +66,7 @@ class WavedromPlugin(BasePlugin[WavedromConfig]):
         f_exists = False
         for section in sections:
             f_exists = True
+            is_code = section.name == "code"
             if self.embed_svg:
                 # render wavedrom to svg
                 # and embed svg into html
@@ -76,9 +78,9 @@ class WavedromPlugin(BasePlugin[WavedromConfig]):
                 new_soup = section
                 new_soup.name = "script"
                 new_soup["type"] = "WaveDrom"
-            
+
             # replace existing element
-            if section.name == "code":
+            if is_code:
                 # replace <pre>
                 section.parent.replace_with(new_soup)
             else:
@@ -92,8 +94,7 @@ class WavedromPlugin(BasePlugin[WavedromConfig]):
         if f_exists and not self.embed_svg:
             new_tag = soup.new_tag("script")
             new_tag.string = (
-                "window.addEventListener('load', function() {"
-                "WaveDrom.ProcessAll();});"
+                "window.addEventListener('load', function() {WaveDrom.ProcessAll();});"
             )
             soup.find("body").append(new_tag)
 

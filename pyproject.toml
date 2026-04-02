@@ -1,0 +1,38 @@
+[project]
+name = "mkdocs-wavedrom-plugin"
+version = "0.1.2"
+description = "A MkDocs plugin for support wavedrom charts in markdown file"
+readme = "README.md"
+license = "MPL-2.0"
+requires-python = ">=3.12"
+authors = [
+    { name = "Shimoda", email = "kuri65536@hotmail.com" },
+    { name = "Jiajie Chen", email = "c@jia.je" },
+]
+keywords = ["mkdocs", "python", "markdown", "wavedrom"]
+dependencies = [
+    "beautifulsoup4>=4.6.3",
+    "mkdocs>=1.4.0",
+    "wavedrom>=2.0.3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+
+[project.entry-points."mkdocs.plugins"]
+wavedrom = "markdownwavedrom.plugin:WavedromPlugin"
+
+[project.urls]
+Homepage = "https://github.com/kuri65536/mkdocs-wavedrom-plugin"
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["markdownwavedrom"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

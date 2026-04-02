@@ -1,0 +1,11 @@
+[project]
+name = "e2e-embed-svg"
+version = "0.0.0"
+requires-python = ">=3.12"
+dependencies = [
+    "mkdocs>=1.4.0",
+    "mkdocs-wavedrom-plugin",
+]
+
+[tool.uv.sources]
+mkdocs-wavedrom-plugin = { path = "../.." }

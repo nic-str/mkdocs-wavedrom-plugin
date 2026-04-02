@@ -1,0 +1,11 @@
+site_name: e2e-pymdownx-embed-svg
+plugins:
+    - wavedrom:
+        pymdownx: true
+        embed_svg: true
+markdown_extensions:
+    - pymdownx.superfences:
+        custom_fences:
+            - name: wavedrom
+              class: wavedrom
+              format: !!python/name:markdownwavedrom.plugin.fence_wavedrom_format
