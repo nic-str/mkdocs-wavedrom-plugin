@@ -4,7 +4,7 @@ version = "0.1.2"
 description = "A MkDocs plugin for support wavedrom charts in markdown file"
 readme = "README.md"
 license = "MPL-2.0"
-requires-python = ">=3.12"
+requires-python = ">=3.9"
 authors = [
     { name = "Shimoda", email = "kuri65536@hotmail.com" },
     { name = "Jiajie Chen", email = "c@jia.je" },
