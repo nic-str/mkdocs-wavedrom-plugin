@@ -1,31 +1,10 @@
 import pytest
 from markdownwavedrom.plugin import (
-    _escape,
     fence_wavedrom_format,
     WavedromPlugin,
     WavedromConfig,
 )
 from bs4 import BeautifulSoup
-
-
-class TestEscape:
-    def test_ampersand(self):
-        assert _escape("a&b") == "a&amp;b"
-
-    def test_lt(self):
-        assert _escape("a<b") == "a&lt;b"
-
-    def test_gt(self):
-        assert _escape("a>b") == "a&gt;b"
-
-    def test_combined(self):
-        assert _escape("a&b<c>d") == "a&amp;b&lt;c&gt;d"
-
-    def test_no_special(self):
-        assert _escape("abc") == "abc"
-
-    def test_empty(self):
-        assert _escape("") == ""
 
 
 class TestFenceWavedromFormat:
@@ -119,6 +98,14 @@ class TestDefaultMode:
         result = p.on_post_page(HTML_WITH_CODE_BLOCK, config={})
         assert '{ signal: [{ name: "A", wave: "01" }] }' in result
 
+    def test_plain_wavedrom_class_also_matched(self):
+        # classic output without the "language-" prefix must work too
+        p = _make_plugin()
+        html = HTML_WITH_CODE_BLOCK.replace("language-wavedrom", "wavedrom")
+        result = p.on_post_page(html, config={})
+        assert 'type="WaveDrom"' in result
+        assert "WaveDrom.ProcessAll()" in result
+
 
 class TestEmbedSvgMode:
     def test_renders_svg(self):
@@ -151,3 +138,46 @@ class TestPymdownxEmbedSvg:
         p = _make_plugin(pymdownx=True, embed_svg=True)
         result = p.on_post_page(HTML_WITH_SCRIPT_TAG, config={})
         assert "<svg" in result
+
+
+class TestThemeSwitch:
+    def test_script_has_data_attributes(self):
+        p = _make_plugin(
+            theme_switch=True,
+            light_scheme="light",
+            dark_scheme="slate",
+            light_skin="default",
+            dark_skin="dark",
+        )
+        script = p._theme_switch_script()
+        assert 'data-scheme-light="light"' in script
+        assert 'data-scheme-dark="slate"' in script
+        assert 'data-skin-light="default"' in script
+        assert 'data-skin-dark="dark"' in script
+        assert script.startswith("<script ")
+
+    def test_attribute_values_are_escaped(self):
+        p = _make_plugin(theme_switch=True, light_scheme='a"b')
+        script = p._theme_switch_script()
+        assert 'data-scheme-light="a&quot;b"' in script
+
+    def test_runtime_loaded_from_separate_file(self):
+        p = _make_plugin(theme_switch=True)
+        script = p._theme_switch_script()
+        assert "document.currentScript" in script
+        assert "MutationObserver" in script
+        assert "WaveDrom.ProcessAll" in script
+        assert "{{" not in script  # no template placeholders left
+
+    def test_injected_before_body_end(self):
+        p = _make_plugin(theme_switch=True)
+        result = p.on_post_page(HTML_WITH_CODE_BLOCK, config={})
+        # theme switch runtime replaces the plain ProcessAll script
+        assert 'data-md-color-scheme' in result
+        assert "WaveDrom.ProcessAll" in result
+
+    def test_not_injected_when_disabled(self):
+        p = _make_plugin(theme_switch=False)
+        result = p.on_post_page(HTML_WITH_CODE_BLOCK, config={})
+        assert "data-md-color-scheme" not in result
+        assert "WaveDrom.ProcessAll" in result
